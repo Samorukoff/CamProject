@@ -1,0 +1,82 @@
+version: "3.9"
+
+services:
+  auth:
+    build: .
+    container_name: auth_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+    working_dir: /app
+    restart: unless-stopped
+
+  dashboard:
+    build: .
+    container_name: dashboard_backend
+    ports:
+      - "8001:8000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: ["uvicorn", "project.dashboard.routers:router", "--host", "0.0.0.0", "--port", "8000"]
+    restart: unless-stopped
+
+  subscribe:
+    build: .
+    container_name: subscribe_backend
+    ports:
+      - "8002:8000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: ["uvicorn", "project.subscribe.routers:router", "--host", "0.0.0.0", "--port", "8000"]
+    restart: unless-stopped
+
+  analysis:
+      build: .
+      container_name: analysis_backend
+      ports:
+        - "8003:8000"
+      env_file:
+        - .env
+      depends_on:
+        - postgres
+      volumes:
+        - .:/app
+      working_dir: /app
+      command: ["uvicorn", "project.analysis.routers:router", "--host", "0.0.0.0", "--port", "8000"]
+      restart: unless-stopped
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres_container
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    tty: true
+    stdin_open: true

@@ -1,0 +1,79 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# pg
+pgdata/
+
+# Poetry
+poetry.lock
+.cache/
+dist/
+build/
+
+# Virtual environments
+.env
+.venv/
+venv/
+ENV/
+env.bak/
+env/
+
+# Editor & OS junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Pytest
+.cache/
+.pytest_cache/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Coverage reports
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+*.py,cover
+
+# Logs
+*.log
+
+# Databases / data
+*.sqlite3
+*.db
+*.dump
+
+# Local env files
+.env*
+!.env.example
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Docker
+*.pid
+*.tar
+docker-compose.override.yml
+
+# VS Code specific
+.vscode/
+
+# macOS
+*.DS_Store
+
+# System files
+*.bak
+*.tmp
+~$*

@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "camproject"
+version = "0.1.0"
+description = "My first API"
+authors = ["Samorukoff"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+sqlalchemy = "^2.0"
+fastapi = "^0.110.0"
+apscheduler = "^3.10.4"
+psycopg2-binary = "^2.9.10"
+python-multipart = "^0.0.6"
+uvicorn = { extras = ["standard"], version = "^0.30.0" }
+python-jose = "^3.3.0"
+pydantic = { extras = ["email"], version = "^2.0" }
+pydantic-settings = "^2.2"
+passlib = { extras = ["bcrypt"], version = "^1.7.4" }
+asyncpg = "^0.29.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
