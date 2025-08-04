@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import StreamingResponse
 from io import StringIO
@@ -17,43 +17,36 @@ router = APIRouter()
             summary="Все точки всех компаний",
             description="Общая информация по всем доступным точкам сервиса: названия, адреса, компании")
 async def get_points(
-    db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: User = Depends(get_current_user)
 ):
-    return await fetch_all_points(db)
+    return await fetch_all_points()
 
 # Сводная информация по точкам компании
 @router.get("/analysis", response_model=AnalysisSummary,
             summary="Сводка по подписке и доступу",
             description="Тип подписки, стоимость, срок, число доступных камер.")
 async def analysis_summary(
-    db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: User = Depends(get_current_user)
 ):
-    summary = await get_summary(user.id, db)
-    if not summary:
-        raise HTTPException(status_code=403, detail="No active subscription")
-    return summary
+    return await get_summary(user.id)
 
 # Таблица с подробной информацией
 @router.get("/analysis/table", response_model=list[AnalysisRow],
             summary="Сводная таблица",
             description="Аналитическая информация по всем доступным по подписке точкам")
 async def analysis_table(
-    db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: User = Depends(get_current_user)
 ):
-    return await get_analysis_rows(user.id, db)
+    return await get_analysis_rows(user.id)
 
 # Выгрузка таблицы
 @router.get("/analysis/table/export",
             summary="Выгрузка сводной таблицы",
             description="Аналитическая информация по всем доступным по подписке точкам в CSV формате")
 async def export_analysis_table(
-    db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_user),
+    user: User = Depends(get_current_user)
 ):
-    rows = await get_analysis_rows(user.id, db)
+    rows = await get_analysis_rows(user.id)
 
     stream = StringIO()
     writer = csv.writer(stream)

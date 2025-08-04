@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from project.analysis.repositories import (
     get_all_points,
@@ -9,16 +10,16 @@ from project.subscribe.repositories import get_user_subscription
 from datetime import datetime
 
 # Запускает выгрузку всех точек всех компаний
-async def fetch_all_points(db: AsyncSession):
-    return await get_all_points(db)
+async def fetch_all_points():
+    return await get_all_points()
 
-async def get_analysis_rows(user_id: int, db: AsyncSession):
-    subscription = await get_user_subscription(db, user_id)
+async def get_analysis_rows(user_id: int):
+    subscription = await get_user_subscription(user_id)
     if not subscription or not subscription.subscription_type:
         return []
 
     company_id = subscription.subscription_type.company
-    data = await get_analysis_data_for_company(db, company_id)
+    data = await get_analysis_data_for_company(company_id)
 
     rows = []
     for item in data:
@@ -34,18 +35,18 @@ async def get_analysis_rows(user_id: int, db: AsyncSession):
 
     return rows
 
-async def get_summary(user_id: int, db: AsyncSession):
-    subscription = await get_user_subscription(db, user_id)
+async def get_summary(user_id: int):
+    subscription = await get_user_subscription(user_id)
     if not subscription or not subscription.subscription_type:
-        return None
+        raise HTTPException(status_code=403, detail="No active subscription")
 
     company_id = subscription.subscription_type.company
-    total_points, total_cameras, last_updated = await get_analysis_summary(db, company_id)
+    total_points, total_cameras, last_updated = await get_analysis_summary(company_id)
 
     return AnalysisSummary(
         subscription=subscription.subscription_type.name,
         price=subscription.subscription_type.price,
-        remaining_days = (subscription.end_date - datetime.utcnow()).days,
+        remaining_days=(subscription.end_date - datetime.utcnow()).days,
         total_cameras=total_cameras or 0,
         last_updated=last_updated or datetime.utcnow()
     )

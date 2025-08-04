@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from contextlib import asynccontextmanager
 from project.dashboard.routers import router as dashboard_router
 from project.auth.routers import router as auth_router
@@ -10,9 +10,10 @@ import logging
 
 from project.subscribe.models import SubscriptionType
 from project.analysis.models import Point
-from project.company.models import Company 
+from project.company.models import Company
 
-from project.utils.scheduler import start_subscription_scheduler
+from project.context import set_session_context
+from project.subscribe.utils.scheduler import start_subscription_scheduler
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -26,7 +27,7 @@ async def lifespan(app: FastAPI):
 
     yield
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, dependencies=[Depends(set_session_context)])
 
 # Роутеры по своим префиксам
 app.include_router(auth_router, tags=["auth"])

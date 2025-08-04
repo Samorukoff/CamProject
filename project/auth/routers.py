@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from project.utils.jwt import create_access_token
+from project.auth.utils.jwt import create_access_token
 from project.auth.schemas import UserCreate, Token
 from project.auth.dependencies import get_db
 from project.auth.services import register_user, authenticate_user
@@ -10,8 +10,8 @@ router = APIRouter()
 
 @router.post("/auth/register", response_model=Token,
             summary="Регистрация")
-async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
-    new_user = await register_user(user, db)
+async def register(user: UserCreate):
+    new_user = await register_user(user)
     token = create_access_token({"sub": str(new_user.full_name)})
     return {
         "access_token": token,
@@ -22,8 +22,8 @@ async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
 
 @router.post("/auth/login", response_model=Token,
             summary="Авторизация")
-async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
-    auth_user = await authenticate_user(form_data.username, form_data.password, db)
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    auth_user = await authenticate_user(form_data.username, form_data.password)
     if not auth_user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     token = create_access_token({"sub": str(auth_user.full_name)})

@@ -1,9 +1,9 @@
 version: "3.9"
 
 services:
-  auth:
+  app:
     build: .
-    container_name: auth_backend
+    container_name: my_backend
     ports:
       - "8000:8000"
     env_file:
@@ -13,55 +13,11 @@ services:
     volumes:
       - .:/app
     working_dir: /app
+    command: ["uvicorn", "project.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     restart: unless-stopped
-
-  dashboard:
-    build: .
-    container_name: dashboard_backend
-    ports:
-      - "8001:8000"
-    env_file:
-      - .env
-    depends_on:
-      - postgres
-    volumes:
-      - .:/app
-    working_dir: /app
-    command: ["uvicorn", "project.dashboard.routers:router", "--host", "0.0.0.0", "--port", "8000"]
-    restart: unless-stopped
-
-  subscribe:
-    build: .
-    container_name: subscribe_backend
-    ports:
-      - "8002:8000"
-    env_file:
-      - .env
-    depends_on:
-      - postgres
-    volumes:
-      - .:/app
-    working_dir: /app
-    command: ["uvicorn", "project.subscribe.routers:router", "--host", "0.0.0.0", "--port", "8000"]
-    restart: unless-stopped
-
-  analysis:
-      build: .
-      container_name: analysis_backend
-      ports:
-        - "8003:8000"
-      env_file:
-        - .env
-      depends_on:
-        - postgres
-      volumes:
-        - .:/app
-      working_dir: /app
-      command: ["uvicorn", "project.analysis.routers:router", "--host", "0.0.0.0", "--port", "8000"]
-      restart: unless-stopped
 
   postgres:
-    image: postgres:latest
+    image: postgres:15
     container_name: postgres_container
     env_file:
       - .env

@@ -15,17 +15,17 @@ def verify_password(plain: str, hashed: str):
     return pwd_context.verify(plain, hashed)
 
 # Регистрация пользователя
-async def register_user(user: UserCreate, db: AsyncSession):
+async def register_user(user: UserCreate):
     new_user = User(
         full_name=user.full_name,
         email=user.email,
         password=hash_password(user.password)
     )
-    return await register_user_in_db(new_user, db)
+    return await register_user_in_db(new_user)
 
 #Авторизация пользователя
-async def authenticate_user(full_name: str, password: str, db: AsyncSession):
-    user = await get_user_by_name(full_name, db)
+async def authenticate_user(full_name: str, password: str):
+    user = await get_user_by_name(full_name)
     if not user or not verify_password(password, user.password):
         return None
     return user
