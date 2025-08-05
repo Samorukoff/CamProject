@@ -1,7 +1,7 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, Boolean, String
 
-from project.database import Base
+from project.core.base.models import Base
 
 # Таблица с подписками пользователей
 class Subscription(Base):

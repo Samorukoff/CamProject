@@ -1,6 +1,6 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-from project.database import get_db
+from project.core.config.database.connection import get_db
 from project.subscribe.repositories import update_subscription_statuses
 import asyncio
 

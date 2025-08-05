@@ -1,7 +1,7 @@
 from contextvars import ContextVar
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from project.database import get_db  # твой обычный get_db
+from project.core.config.database.connection import get_db
 
 # Контекстная переменная
 db_session_ctx: ContextVar[AsyncSession] = ContextVar("db_session_ctx")

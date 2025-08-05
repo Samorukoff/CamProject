@@ -1,18 +1,29 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from project.auth.models import User
 from sqlalchemy import select
-from project.context import db_session_ctx
+from project.core.config.database.context import db_session_ctx
+
+from project.core.config.logging.logger import logger
 
 # Добавление пользователя в БД
 async def register_user_in_db(user: User):
+    logger.debug(f"Registering new user in DB: {user.full_name}")
     db = db_session_ctx.get()
     db.add(user)
     await db.commit()
     await db.refresh(user)
+    logger.info(f"User {user.id} successfully registered")
     return user
 
 # Поиск пользователя по имени в БД
 async def get_user_by_name(full_name: str) -> User | None:
+    logger.debug(f"Looking up user by name: {full_name}")
     db = db_session_ctx.get()
     result = await db.execute(select(User).where(User.full_name == full_name))
-    return result.scalar_one_or_none()
+    user = result.scalar_one_or_none()
+
+    if user:
+        logger.info(f"Found user {user.id} for name: {full_name}")
+    else:
+        logger.warning(f"No user found with name: {full_name}")
+
+    return user
