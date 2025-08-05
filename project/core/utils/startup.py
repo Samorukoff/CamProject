@@ -6,7 +6,7 @@ from project.subscribe.utils.scheduler import start_subscription_scheduler
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def run_startup_tasks(app: FastAPI):
     # Инициализация базы данных
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

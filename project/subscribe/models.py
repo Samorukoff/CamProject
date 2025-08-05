@@ -25,5 +25,6 @@ class SubscriptionType(Base):
     name = Column(String, nullable=False)
     price = Column(Integer, nullable=False)
     company = Column(Integer, ForeignKey("companies.id"), nullable=False)
+    description = Column(String, nullable=True)
 
     subscription = relationship("Subscription", back_populates="subscription_type")

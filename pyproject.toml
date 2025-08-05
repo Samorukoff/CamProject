@@ -6,6 +6,7 @@ authors = ["Samorukoff"]
 package-mode = false
 
 [tool.poetry.dependencies]
+alembic = "^1.13.1"
 python = ">=3.11"
 sqlalchemy = "^2.0"
 fastapi = "^0.110.0"
@@ -19,6 +20,7 @@ pydantic-settings = "^2.2"
 passlib = { extras = ["bcrypt"], version = "^1.7.4" }
 asyncpg = "^0.29.0"
 openpyxl = "^3.1.2"
+
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
