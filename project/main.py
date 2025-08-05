@@ -1,62 +1,16 @@
-from fastapi import FastAPI
-from contextlib import asynccontextmanager
-from project.dashboard.routers import router as dashboard_router
-from project.auth.routers import router as auth_router
-from project.subscribe.routers import router as subscribe_router
-from project.analysis.routers import router as analysis_router
-from project.database import Base, engine
-from fastapi.openapi.utils import get_openapi
-import logging
+from fastapi import FastAPI, Depends
+from project.core.utils.startup import run_startup_tasks
+from project.core.router import api_router
+from project.core.utils.docs_config import custom_openapi
+from project.core.config.database.context import set_session_context
 
-from project.subscribe.models import SubscriptionType
-from project.analysis.models import Point
-from project.company.models import Company 
+app = FastAPI(dependencies=[Depends(set_session_context)])
 
-from project.utils.scheduler import start_subscription_scheduler
+# Подключение роутеров
+app.include_router(api_router)
 
-logging.basicConfig(level=logging.DEBUG)
+# Кастомизация Swagger
+app.openapi = lambda: custom_openapi(app)
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-    # старт шедулера
-    start_subscription_scheduler()
-
-    yield
-
-app = FastAPI(lifespan=lifespan)
-
-# Роутеры по своим префиксам
-app.include_router(auth_router, tags=["auth"])
-app.include_router(dashboard_router, tags=["dashboard"])
-app.include_router(subscribe_router, tags=["subscribe"])
-app.include_router(analysis_router, tags=["analysis"])
-
-# Кастомизация Swagger для поддержки OAuth2
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-    openapi_schema = get_openapi(
-        title="CamProject API",
-        version="1.0.0",
-        description="API for CamProject",
-        routes=app.routes,
-    )
-    openapi_schema["components"]["securitySchemes"] = {
-        "OAuth2PasswordBearer": {
-            "type": "oauth2",
-            "flows": {
-                "password": {
-                    "tokenUrl": "/auth/login",
-                    "scopes": {}
-                }
-            }
-        }
-    }
-    openapi_schema["security"] = [{"OAuth2PasswordBearer": []}]
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-app.openapi = custom_openapi
+# Запуск фоновых задач
+run_startup_tasks(app)

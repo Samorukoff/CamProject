@@ -1,16 +1,24 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from sqlalchemy.orm import joinedload
 from project.analysis.models import AnalysisData
-from project.subscribe.models import Subscription, SubscriptionType
 from project.analysis.models import Point
+from project.core.config.database.context import db_session_ctx
+
+from project.core.config.logging.logger import logger
 
 # Выгрузка из БД всех точек всех компаний
-async def get_all_points(db: AsyncSession):
+async def get_all_points():
+    logger.debug("Fetching all points from DB")
+    db = db_session_ctx.get()
     result = await db.execute(select(Point))
-    return result.scalars().all()
+    points = result.scalars().all()
+    logger.info(f"Fetched {len(points)} points")
+    return points
 
-async def get_analysis_data_for_company(db: AsyncSession, company_id: int):
+# Выгрузка из БД аналитических данных по точкам для конкретной компании
+async def get_analysis_data_for_company(company_id: int):
+    logger.debug(f"Fetching analysis data for company_id={company_id}")
+    db = db_session_ctx.get()
     stmt = (
         select(AnalysisData)
         .join(AnalysisData.point)
@@ -18,9 +26,14 @@ async def get_analysis_data_for_company(db: AsyncSession, company_id: int):
         .where(Point.company == company_id)
     )
     result = await db.execute(stmt)
-    return result.scalars().all()
+    data = result.scalars().all()
+    logger.info(f"Fetched {len(data)} analysis records for company_id={company_id}")
+    return data
 
-async def get_analysis_summary(db: AsyncSession, company_id: int):
+# Выгрузка из БД сводки для конкретной компании
+async def get_analysis_summary(company_id: int):
+    logger.debug(f"Calculating summary for company_id={company_id}")
+    db = db_session_ctx.get()
     stmt = (
         select(
             func.count(func.distinct(AnalysisData.point_id)),
@@ -31,4 +44,6 @@ async def get_analysis_summary(db: AsyncSession, company_id: int):
         .where(Point.company == company_id)
     )
     result = await db.execute(stmt)
-    return result.first()
+    summary = result.first()
+    logger.info(f"Summary for company_id={company_id}: {summary}")
+    return summary

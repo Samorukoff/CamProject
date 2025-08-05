@@ -2,20 +2,14 @@ import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings(BaseSettings):
+class DatabaseSettings(BaseSettings):
     DB_USER: str
     DB_PASSWORD: str
     DB_HOST: str
     DB_PORT: int
     DB_NAME: str
-    
-    SECRET_KEY: str
-    ALGORITHM: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int
 
-    model_config = SettingsConfigDict(
-        env_file=os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
-    )
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     # метод, который позволит генерировать ссылку для
     # асинхронного подключения к базе данных PostgreSQL через SQLAlchemy.
@@ -24,4 +18,4 @@ class Settings(BaseSettings):
                 f"{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}")
 
         
-settings = Settings()
+database_settings = DatabaseSettings()

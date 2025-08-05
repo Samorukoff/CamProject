@@ -1,7 +1,7 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String
 
-from project.database import Base
+from project.core.base.models import Base
 
 # Таблица с пользователями
 class User(Base):

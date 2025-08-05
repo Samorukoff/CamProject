@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey, String, DateTime, Float
 from sqlalchemy.orm import relationship
-from project.database import Base
+from project.core.base.models import Base
 from datetime import datetime
 
 class AnalysisData(Base):

@@ -1,7 +1,7 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, Boolean, String
 
-from project.database import Base
+from project.core.base.models import Base
 
 # Таблица с подписками пользователей
 class Subscription(Base):
@@ -25,5 +25,6 @@ class SubscriptionType(Base):
     name = Column(String, nullable=False)
     price = Column(Integer, nullable=False)
     company = Column(Integer, ForeignKey("companies.id"), nullable=False)
+    description = Column(String, nullable=True)
 
     subscription = relationship("Subscription", back_populates="subscription_type")

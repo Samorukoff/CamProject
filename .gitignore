@@ -10,7 +10,6 @@ __pycache__/
 pgdata/
 
 # Poetry
-poetry.lock
 .cache/
 dist/
 build/
