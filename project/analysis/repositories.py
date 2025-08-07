@@ -7,10 +7,11 @@ from project.core.config.database.context import db_session_ctx
 from project.core.config.logging.logger import logger
 
 # Выгрузка из БД всех точек всех компаний
-async def get_all_points():
+async def get_all_points(company_id: int):
     logger.debug("Fetching all points from DB")
     db = db_session_ctx.get()
-    result = await db.execute(select(Point))
+    stmt = select(Point).where(Point.company == company_id)
+    result = await db.execute(stmt)
     points = result.scalars().all()
     logger.info(f"Fetched {len(points)} points")
     return points

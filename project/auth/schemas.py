@@ -5,6 +5,13 @@ class UserCreate(BaseModel):
     full_name: str
     email: EmailStr
     password: str
+    company_id: str
+
+class AdminCreate(BaseModel):
+    full_name: str
+    email: EmailStr
+    password: str
+    company_name: str
 
 # Схема для токена
 class Token(BaseModel):

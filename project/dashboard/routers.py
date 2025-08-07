@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from project.auth.dependencies import get_current_user
+from project.auth.dependencies import get_current_admin
 from project.auth.models import User
 from project.dashboard.services import determine_dashboard_redirect
 
@@ -13,7 +13,7 @@ router = APIRouter()
             summary="Основной дашборд",
             description="Отображение текущей подписки пользователя и статуса доступа")
 async def dashboard_entry(
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_admin)
 ):
     logger.info(f"Dashboard accessed by user_id={user.id}")
     redirect = await determine_dashboard_redirect(user.id)
