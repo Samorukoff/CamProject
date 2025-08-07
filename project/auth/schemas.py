@@ -9,4 +9,9 @@ class UserCreate(BaseModel):
 # Схема для токена
 class Token(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str = "bearer"
+
+# Схема для запроса с refresh токеном
+class RefreshRequest(BaseModel):
+    refresh_token: str

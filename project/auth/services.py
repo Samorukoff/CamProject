@@ -3,6 +3,11 @@ from project.auth.models import User
 from project.auth.schemas import UserCreate
 from project.auth.repositories import register_user_in_db, get_user_by_name
 from passlib.context import CryptContext
+from project.auth.utils.jwt import (
+    verify_refresh_token,
+    create_access_token,
+    create_refresh_token
+)
 
 from project.core.config.logging.logger import logger
 
@@ -45,3 +50,24 @@ async def authenticate_user(full_name: str, password: str):
 
     logger.info(f"User {user.id} authenticated successfully")
     return user
+
+# Проверка refresh токена
+def rotate_tokens(refresh_token: str) -> dict:
+    if not refresh_token:
+        raise HTTPException(status_code=400, detail="Missing refresh token")
+
+    payload = verify_refresh_token(refresh_token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    sub = payload.get("sub")
+    if not sub:
+        raise HTTPException(status_code=401, detail="Invalid payload")
+
+    return {
+        "access_token": create_access_token({"sub": sub}),
+        "refresh_token": create_refresh_token({"sub": sub}),
+        "token_type": "bearer",
+        "action": "stay",
+        "to": "/"
+    }
