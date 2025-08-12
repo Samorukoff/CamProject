@@ -1,4 +1,5 @@
 from project.auth.models import User
+from project.company.models import Company
 from sqlalchemy import select
 from project.core.config.database.context import db_session_ctx
 
@@ -27,3 +28,19 @@ async def get_user_by_name(full_name: str) -> User | None:
         logger.warning(f"No user found with name: {full_name}")
 
     return user
+
+# Поиск компании по названию в БД
+async def get_company_by_name(name: str) -> Company | None:
+    db = db_session_ctx.get()
+    result = await db.execute(select(Company).where(Company.name == name))
+    return result.scalar_one_or_none()
+
+# Создание новой компании в БД
+async def create_company(name: str) -> Company:
+    db = db_session_ctx.get()
+    company = Company(name=name)
+    db.add(company)
+    await db.commit()
+    await db.refresh(company)
+    logger.info(f"Company {company.id} created")
+    return company

@@ -15,23 +15,20 @@ from datetime import datetime
 from project.core.config.logging.logger import logger
 
 # Запускает выгрузку всех точек всех компаний
-async def fetch_all_points():
+async def fetch_all_points(company_id: int):
     logger.debug("Fetching all points from repository")
-    points = await get_all_points()
-    logger.info(f"Fetched {len(points)} points from DB")
+    points = await get_all_points(company_id)
+    logger.info(f"Fetched {len(points)} points from DB for company ID: {company_id}")
     return points
 
 # Выгрузка аналитических данных
-async def get_analysis_rows(user_id: int) -> list[AnalysisRow]:
+async def get_analysis_rows(user_id: int, company_id: int) -> list[AnalysisRow]:
     logger.debug(f"Getting analysis rows for user_id={user_id}")
 
     subscription = await get_user_subscription(user_id)
     if not subscription or not subscription.subscription_type:
         logger.warning(f"No active subscription for user_id={user_id}")
-        return []
-
-    company_id = subscription.subscription_type.company
-    logger.debug(f"Company ID for analysis: {company_id}")
+        raise HTTPException(status_code=404, detail="Active subscription not found")
 
     data = await get_analysis_data_for_company(company_id) or []
     logger.info(f"Fetched {len(data)} analysis records for company_id={company_id}")
@@ -52,10 +49,10 @@ async def get_analysis_rows(user_id: int) -> list[AnalysisRow]:
     return rows
 
 # Построение таблицы Excel
-async def construct_table(user_id: int):
+async def construct_table(user_id: int, company_id: int):
     logger.info(f"Starting Excel export for user_id={user_id}")
 
-    rows = await get_analysis_rows(user_id)
+    rows = await get_analysis_rows(user_id, company_id)
     if not rows:
         logger.warning(f"No data to export for user_id={user_id}")
 
@@ -100,16 +97,13 @@ async def construct_table(user_id: int):
     )
 
 # Сводная информация по подписке и доступным точкам
-async def get_summary(user_id: int):
+async def get_summary(user_id: int, company_id: int):
     logger.debug(f"Getting summary for user_id={user_id}")
 
     subscription = await get_user_subscription(user_id)
     if not subscription or not subscription.subscription_type:
         logger.warning(f"No active subscription found for user_id={user_id}")
         raise HTTPException(status_code=403, detail="No active subscription")
-
-    company_id = subscription.subscription_type.company
-    logger.debug(f"Company ID for summary: {company_id}")
 
     total_points, total_cameras, last_updated = await get_analysis_summary(company_id)
     logger.info(f"Summary for user_id={user_id}: {total_points} points, {total_cameras} cameras")
