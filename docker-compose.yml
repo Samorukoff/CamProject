@@ -14,10 +14,13 @@ services:
       - .:/app
     working_dir: /app
     restart: unless-stopped
+    entrypoint: ["/bin/bash", "-c", "./entrypoint.sh"]
 
   postgres:
     image: postgres:15
     container_name: postgres_container
+    ports:
+    - "5432:5432" 
     env_file:
       - .env
     environment:

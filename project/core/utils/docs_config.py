@@ -5,25 +5,26 @@ def custom_openapi(app: FastAPI):
     if app.openapi_schema:
         return app.openapi_schema
 
-    openapi_schema = get_openapi(
+    schema = get_openapi(
         title="CamProject API",
         version="1.0.0",
         description="API for CamProject",
         routes=app.routes,
     )
 
-    openapi_schema["components"]["securitySchemes"] = {
-        "OAuth2PasswordBearer": {
-            "type": "oauth2",
-            "flows": {
-                "password": {
-                    "tokenUrl": "/auth/login",
-                    "scopes": {}
-                }
-            }
-        }
-    }
+    comps = schema.setdefault("components", {}).setdefault("securitySchemes", {})
+    # убираем кастомную схему, если где-то осталась
+    comps.pop("BearerAuth", None)
 
-    openapi_schema["security"] = [{"OAuth2PasswordBearer": []}]
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
+    # глобально требуем именно HTTPBearer (который FastAPI добавил из зависимости)
+    schema["security"] = [{"HTTPBearer": []}]
+
+    # снять авторизацию с публичных ручек
+    for p in ("/auth/login", "/auth/register", "/auth/refresh", "/info"):
+        if p in schema.get("paths", {}):
+            for m in schema["paths"][p].values():
+                if isinstance(m, dict):
+                    m["security"] = []
+
+    app.openapi_schema = schema
+    return schema

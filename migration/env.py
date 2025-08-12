@@ -12,6 +12,7 @@ from project.auth.models import User
 from project.company.models import Company
 from project.subscribe.models import Subscription, SubscriptionType
 from project.analysis.models import Point, AnalysisData
+from project.employee.models import CompanyMembership
 
 config = context.config
 fileConfig(config.config_file_name)

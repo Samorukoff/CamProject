@@ -11,4 +11,4 @@ echo "✅ DB is ready. Running Alembic migrations..."
 poetry run alembic upgrade head
 
 echo "🚀 Starting application..."
-exec poetry run uvicorn project.main:app --host 0.0.0.0 --port 8000
+exec poetry run uvicorn project.main:app --host 0.0.0.0 --port 8000 --reload

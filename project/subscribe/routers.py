@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from project.auth.dependencies import get_current_admin
+from project.auth.dependencies import get_current_admin, AdminContext
 from project.subscribe.schemas import (
     SubscriptionRead,
     SubscriptionUserSelect,
@@ -22,11 +22,11 @@ router = APIRouter()
             description="Выбор подписки по определенному типу")
 async def subscribe_user(
     payload: SubscriptionUserSelect,
-    current_user: User = Depends(get_current_admin)
+    ctx: AdminContext = Depends(get_current_admin),
 ):
-    logger.info(f"User {current_user.id} is subscribing to {payload.subscription_type_id}")
+    logger.info(f"User {ctx.user.id} is subscribing to {payload.subscription_type_id}")
     subscription = await get_or_create_subscription(
-        user_id=current_user.id,
+        user_id=ctx.user.id,
         subscription_type_id=payload.subscription_type_id
     )
     return subscription
@@ -36,9 +36,9 @@ async def subscribe_user(
             summary="Виды подписок",
             description="Перечень всех доступных подписок. ID, компании, цена")
 async def list_subscription_types(
-    user: User = Depends(get_current_admin)
+    ctx: AdminContext = Depends(get_current_admin),
 ):
-    logger.info(f"User {user.id} requested list of subscription types")
+    logger.info(f"User {ctx.user.id} requested list of subscription types")
     types = await fetch_subscription_types()
     return types
 
@@ -47,11 +47,11 @@ async def list_subscription_types(
             summary="Оплата",
             description="Активация статуса подписки с помощью симуляции оплаты (заглушка)")
 async def pay_subscription(
-    current_user: User = Depends(get_current_admin)
+    ctx: AdminContext = Depends(get_current_admin),
 ):
     # Заглушка оплаты
-    logger.info(f"User {current_user.id} is attempting to pay")
-    result = await simulate_payment(current_user.id)
+    logger.info(f"User {ctx.user.id} is attempting to pay")
+    result = await simulate_payment(ctx.user.id)
 
     return result
 
@@ -61,15 +61,15 @@ async def pay_subscription(
             description="Замена текущего ID подписки на другой, сброс статуса, снова требуется оплата")
 async def change_subscription(
     payload: SubscriptionUserSelect,
-    current_user: User = Depends(get_current_admin),
+    ctx: AdminContext = Depends(get_current_admin),
 ):
-    logger.info(f"User {current_user.id} requests change of subscription to {payload.subscription_type_id}")
+    logger.info(f"User {ctx.user.id} requests change of subscription to {payload.subscription_type_id}")
     changed = await change_subscription_type(
-        user_id=current_user.id,
+        user_id=ctx.user.id,
         new_type_id=payload.subscription_type_id
     )
     if not changed:
-        logger.warning(f"Subscription not found for user {current_user.id}")
+        logger.warning(f"Subscription not found for user {ctx.user.id}")
         raise HTTPException(status_code=404, detail="Subscription not found")
     
     return changed
