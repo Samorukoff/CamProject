@@ -1,5 +1,6 @@
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from project.core.base.models import Base
 
@@ -11,7 +12,11 @@ class User(Base):
     full_name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
-    is_admin = Column(Boolean, default=False)
-    
-    company_id = Column(Integer, ForeignKey("companies.id"))
-    company = relationship("Company", back_populates="users")
+
+    memberships = relationship(
+        "CompanyMembership",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        foreign_keys="CompanyMembership.user_id",
+    )
+    companies = association_proxy("memberships", "company")

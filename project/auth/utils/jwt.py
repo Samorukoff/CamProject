@@ -1,4 +1,5 @@
 from jose import JWTError, jwt
+from typing import Any, Optional
 from datetime import datetime, timedelta
 from project.auth.utils.config import security_settings
 
@@ -25,9 +26,23 @@ def create_refresh_token(data: dict):
     return jwt.encode(to_encode, security_settings.SECRET_KEY, algorithm=security_settings.ALGORITHM)
 
 
-def verify_refresh_token(token: str):
+def verify_refresh_token(token: str) -> Optional[dict[str, Any]]:
     try:
-        payload = jwt.decode(token, security_settings.SECRET_KEY, algorithms=[security_settings.ALGORITHM])
-        return payload
+        payload = jwt.decode(
+            token,
+            security_settings.SECRET_KEY,
+            algorithms=[security_settings.ALGORITHM],
+            options={"verify_aud": False},  # если не используешь aud
+        )
     except JWTError:
+        return None  # невалидный/просроченный/подпись не сошлась
+
+    # должен быть именно refresh
+    if payload.get("type") != "refresh":
         return None
+
+    # обязательные клеймы
+    if not payload.get("sub"):  # id пользователя
+        return None
+
+    return payload

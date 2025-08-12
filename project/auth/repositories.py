@@ -15,17 +15,31 @@ async def register_user_in_db(user: User):
     logger.info(f"User {user.id} successfully registered")
     return user
 
-# Поиск пользователя по имени в БД
-async def get_user_by_name(full_name: str) -> User | None:
-    logger.debug(f"Looking up user by name: {full_name}")
+# Поиск пользователя по почте в БД
+async def get_user_by_email(email: str) -> User | None:
+    logger.debug(f"Looking up user by email: {email}")
     db = db_session_ctx.get()
-    result = await db.execute(select(User).where(User.full_name == full_name))
+    result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
 
     if user:
-        logger.info(f"Found user {user.id} for name: {full_name}")
+        logger.info(f"Found user {user.id} for name: {email}")
     else:
-        logger.warning(f"No user found with name: {full_name}")
+        logger.warning(f"No user found with name: {email}")
+
+    return user
+
+# Поиск пользователя по ID в БД
+async def get_user_by_id(id: int) -> User | None:
+    logger.debug(f"Looking up user by id: {id}")
+    db = db_session_ctx.get()
+    result = await db.execute(select(User).where(User.id == id))
+    user = result.scalar_one_or_none()
+
+    if user:
+        logger.info(f"Found user {user.id} for name: {id}")
+    else:
+        logger.warning(f"No user found with name: {id}")
 
     return user
 
