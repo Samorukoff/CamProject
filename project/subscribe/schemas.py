@@ -31,7 +31,6 @@ class SubscriptionTypeOut(BaseModel):
     id: int
     name: str
     price: int
-    company: int
 
     model_config = ConfigDict(
         from_attributes=True

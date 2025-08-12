@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from project.auth.dependencies import get_current_user
+from project.auth.dependencies import get_current_admin
 from project.subscribe.schemas import (
     SubscriptionRead,
     SubscriptionUserSelect,
@@ -22,7 +22,7 @@ router = APIRouter()
             description="Выбор подписки по определенному типу")
 async def subscribe_user(
     payload: SubscriptionUserSelect,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_admin)
 ):
     logger.info(f"User {current_user.id} is subscribing to {payload.subscription_type_id}")
     subscription = await get_or_create_subscription(
@@ -36,7 +36,7 @@ async def subscribe_user(
             summary="Виды подписок",
             description="Перечень всех доступных подписок. ID, компании, цена")
 async def list_subscription_types(
-    user: User = Depends(get_current_user)
+    user: User = Depends(get_current_admin)
 ):
     logger.info(f"User {user.id} requested list of subscription types")
     types = await fetch_subscription_types()
@@ -47,7 +47,7 @@ async def list_subscription_types(
             summary="Оплата",
             description="Активация статуса подписки с помощью симуляции оплаты (заглушка)")
 async def pay_subscription(
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_admin)
 ):
     # Заглушка оплаты
     logger.info(f"User {current_user.id} is attempting to pay")
@@ -61,7 +61,7 @@ async def pay_subscription(
             description="Замена текущего ID подписки на другой, сброс статуса, снова требуется оплата")
 async def change_subscription(
     payload: SubscriptionUserSelect,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin),
 ):
     logger.info(f"User {current_user.id} requests change of subscription to {payload.subscription_type_id}")
     changed = await change_subscription_type(

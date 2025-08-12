@@ -14,7 +14,6 @@ class Subscription(Base):
     end_date = Column(DateTime, nullable=False)
     is_active = Column(Boolean, nullable=False)
 
-    user = relationship("User", back_populates="subscriptions")
     subscription_type = relationship("SubscriptionType", back_populates="subscription")
 
 # Таблица с видами подписок
@@ -24,7 +23,6 @@ class SubscriptionType(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     price = Column(Integer, nullable=False)
-    company = Column(Integer, ForeignKey("companies.id"), nullable=False)
     description = Column(String, nullable=True)
 
     subscription = relationship("Subscription", back_populates="subscription_type")
